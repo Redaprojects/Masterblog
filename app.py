@@ -69,7 +69,7 @@ def add():
 # Attaches the flask app to the delete route.
 @app.route('/delete/<int:post_id>')
 def delete(post_id):
-    """ Loads then removes a post from the storage by selecting its unique ID."""
+    """ Loads then removes an existing post from the storage by selecting its unique ID."""
     blog_posts = load_posts()
 
     # Creates a new list of posts that do not have the ID we want to delete.
@@ -80,6 +80,7 @@ def delete(post_id):
     # Redirect back to the home page
     return redirect(url_for('index'))
 
+
 # create a helper function to retrieve a post by ID:
 def fetch_post_by_id(post_id, filename='posts.json'):
     posts = load_posts(filename)
@@ -88,11 +89,15 @@ def fetch_post_by_id(post_id, filename='posts.json'):
             return post
     return None
 
+
 # Attaches the flask app to the update route.
 @app.route('/update/<int:post_id>', methods=['GET', 'POST'])
 def update(post_id):
-    """ Modifies to a post from the storage """
-    # To display the update form  populated with the current details of the blog post.
+    """
+    Modifies an existing post in the storage by specifying a unique ID, overwriting it and
+    Save it to the storage.
+    """
+    # To display the update form, populated with the current details of the blog post.
     posts = load_posts()
     post = next((pos_t for pos_t in posts if pos_t['id'] == post_id), None)
 
@@ -101,9 +106,9 @@ def update(post_id):
 
     # If the request is a POST it will update the details for the blog post from the list.
     if request.method == 'POST':
-        post['title'] == request.form.get('title')
-        post['author'] == request.form.get('author')
-        post['content'] == request.form.get('content')
+        post['title'] = request.form.get('title')
+        post['author'] = request.form.get('author')
+        post['content'] = request.form.get('content')
         save_posts(posts)
         return redirect(url_for('index'))
 
