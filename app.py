@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 
 def load_posts(filename='posts.json'):
-    """Load blog posts from JSON file"""
+    """Retrieves all blog posts from JSON file"""
     try:
         with open(filename, 'r') as file:
             return json.load(file)
@@ -14,7 +14,7 @@ def load_posts(filename='posts.json'):
 
 
 def save_posts(posts, filename='posts.json'):
-    """Save blog posts to JSON file"""
+    """Overwrites a blog post from JSON file"""
     with open(filename, 'w') as f:
         json.dump(posts, f, indent=4)
 
@@ -69,14 +69,45 @@ def add():
 # Attaches the flask app to the delete route.
 @app.route('/delete/<int:post_id>')
 def delete(post_id):
-    """removes a post from the storage"""
+    """ Loads then removes a post from the storage by selecting its unique ID."""
     blog_posts = load_posts()
+
+    # Creates a new list of posts that do not have the ID we want to delete.
+    # This effectively removes the targeted post.
     # Remove the post with matching ID
     blog_posts = [post for post in blog_posts if post['id'] != post_id]
     save_posts(blog_posts)
     # Redirect back to the home page
     return redirect(url_for('index'))
 
+# create a helper function to retrieve a post by ID:
+def fetch_post_by_id(post_id, filename='posts.json'):
+    posts = load_posts(filename)
+    for post in posts:
+        if post['id'] == post_id:
+            return post
+    return None
+
+# Attaches the flask app to the update route.
+@app.route('/update/<int:post_id>', methods=['GET', 'POST'])
+def update(post_id):
+    """ Modifies to a post from the storage """
+    # To display the update form  populated with the current details of the blog post.
+    posts = load_posts()
+    post = next((pos_t for pos_t in posts if pos_t['id'] == post_id), None)
+
+    if post is None:
+        return "Post not found", 404
+
+    # If the request is a POST it will update the details for the blog post from the list.
+    if request.method == 'POST':
+        post['title'] == request.form.get('title')
+        post['author'] == request.form.get('author')
+        post['content'] == request.form.get('content')
+        save_posts(posts)
+        return redirect(url_for('index'))
+
+    return render_template('update.html', post=post)
 
 # Runs the Flask app by calling the run method.
 if __name__ == '__main__':
