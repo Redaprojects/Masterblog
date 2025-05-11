@@ -3,8 +3,9 @@ import json
 
 app = Flask(__name__)
 
-# Load blog posts from JSON file
+
 def load_posts(filename='posts.json'):
+    """Load blog posts from JSON file"""
     try:
         with open(filename, 'r') as file:
             return json.load(file)
@@ -12,13 +13,13 @@ def load_posts(filename='posts.json'):
         return []
 
 
-# Save blog posts to JSON file
 def save_posts(posts, filename='posts.json'):
+    """Save blog posts to JSON file"""
     with open(filename, 'w') as f:
         json.dump(posts, f, indent=4)
 
 
-# Attaches the flask app to the home route.
+# Attaches the flask app to the index route.
 @app.route('/')
 def index():
     """
@@ -29,9 +30,10 @@ def index():
     return render_template('index.html', posts=blog_posts)
 
 
+# Attaches the flask app to the add route.
 @app.route('/add', methods=['GET', 'POST'])
 def add():
-
+    """Adds a new post by previewing the form file to the user."""
     # IF a post request is sent to this route, it will add a new blog post
     # Route to add a new blog post
     if request.method == 'POST':
@@ -64,8 +66,18 @@ def add():
     return render_template('add.html')
 
 
+# Attaches the flask app to the delete route.
+@app.route('/delete/<int:post_id>')
+def delete(post_id):
+    """removes a post from the storage"""
+    blog_posts = load_posts()
+    # Remove the post with matching ID
+    blog_posts = [post for post in blog_posts if post['id'] != post_id]
+    save_posts(blog_posts)
+    # Redirect back to the home page
+    return redirect(url_for('index'))
 
 
-# Runs the flask app by calling the run method.
+# Runs the Flask app by calling the run method.
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
