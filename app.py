@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 
 def load_posts(filename='posts.json'):
-    """Retrieves all blog posts from JSON file"""
+    """Retrieves all blog posts from the storage file"""
     try:
         with open(filename, 'r') as file:
             return json.load(file)
@@ -15,7 +15,7 @@ def load_posts(filename='posts.json'):
 
 
 def save_posts(posts, filename='posts.json'):
-    """Overwrites a blog post from JSON file"""
+    """Overwrites a blog post from the storage file"""
     with open(filename, 'w') as f:
         json.dump(posts, f, indent=4)
 
@@ -97,7 +97,7 @@ def fetch_post_by_id(post_id, filename='posts.json'):
 def update(post_id):
     """
     Modifies an existing post in the storage by specifying a unique ID, overwriting it and
-    Save it to the storage.
+    Save it in the storage.
     """
     # To display the update form, populated with the current details of the blog post.
     posts = load_posts()
@@ -106,7 +106,7 @@ def update(post_id):
     if post is None:
         return "Post not found", 404
 
-    # If the request is a POST it will update the details for the blog post from the list.
+    # If the request is a POST, it will update the details for the blog post from the list.
     if request.method == 'POST':
         post['title'] = request.form.get('title')
         post['author'] = request.form.get('author')
@@ -137,7 +137,7 @@ def view_post(post_id):
 @app.route('/like/<int:post_id>', methods=['POST'])
 def like_post(post_id):
     """
-    Loads the storage, then goes over each post to match it with the unique ID.
+    Loads the storage, then iterates over each post to match it with the unique ID.
     If there is a post, it will add a like by the user and save it to the
     storage, then it returns the view_post file to the user.
     """
@@ -155,10 +155,10 @@ def like_post(post_id):
 @app.route('/comment/<int:post_id>', methods=['POST'])
 def comment_post(post_id):
     """
-    Loads the storage, then initializes post to find the unique ID by going over
+    Loads the storage, then initializes the post to find the unique ID by iterating over
     each post to match it with the unique ID.
-    Prompts the user to enter their details and previews for the user, their names, comments, and
-    when exactly they wrote the comments.
+    Prompts the user to enter their details and previews for the user, their names, and comments.
+    And when exactly were the comments written.
     It returns the URL of the index.html
     """
     blog_posts = load_posts()
