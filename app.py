@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 import json
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -51,7 +52,8 @@ def add():
             'id': new_id,
             'author': author,
             'title': title,
-            'content': content
+            'content': content,
+            'likes': 0  # Initialize likes to 0
         }
 
         # Add the new post to the list and save it
@@ -113,6 +115,71 @@ def update(post_id):
         return redirect(url_for('index'))
 
     return render_template('update.html', post=post)
+
+
+# Attaches the flask app to the post route.
+@app.route('/post/<int:post_id>')
+def view_post(post_id):
+    """
+    Display a single blog post with its likes and comments by
+    going over each post to match it with the unique ID..
+    If there is a post, it returns the file to the user; otherwise, it previews an error message.
+    """
+    blog_posts = load_posts()
+    post = next((post for post in blog_posts if post['id'] == post_id), None)
+
+    if post:
+        return render_template('view_post.html', post=post)
+    return "Post not found", 404
+
+
+# Attaches the flask app to the like route.
+@app.route('/like/<int:post_id>', methods=['POST'])
+def like_post(post_id):
+    """
+    Loads the storage, then goes over each post to match it with the unique ID.
+    If there is a post, it will add a like by the user and save it to the
+    storage, then it returns the view_post file to the user.
+    """
+    blog_posts = load_posts()
+    post = next((post for post in blog_posts if post['id'] == post_id), None)
+
+    if post:
+        post['likes'] += 1
+        save_posts(blog_posts)
+
+    return redirect(url_for('view_post', post_id=post_id))
+
+
+# Attaches the flask app to the comment route.
+@app.route('/comment/<int:post_id>', methods=['POST'])
+def comment_post(post_id):
+    """
+    Loads the storage, then initializes post to find the unique ID by going over
+    each post to match it with the unique ID.
+    Prompts the user to enter their details and previews for the user, their names, comments, and
+    when exactly they wrote the comments.
+    It returns the URL of the index.html
+    """
+    blog_posts = load_posts()
+    post = next((p for p in blog_posts if p['id'] == post_id), None)
+
+    if post:
+        author = request.form.get('author')
+        text = request.form.get('text')
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        comment = {
+            "author": author,
+            "text": text,
+            "timestamp": timestamp
+        }
+
+        post.setdefault("comments", []).append(comment)
+        save_posts(blog_posts)
+
+    return redirect(url_for('index'))
+
 
 # Runs the Flask app by calling the run method.
 if __name__ == '__main__':
